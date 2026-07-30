@@ -138,7 +138,6 @@ const run = async () => {
                 query.isRemote = req.query.isRemote;
             }
 
-
             if (req.query.companyId) {
                 query.companyId = req.query.companyId;
             }
@@ -157,7 +156,7 @@ const run = async () => {
                 const cursor = jobsCollection.find(query).skip(skipItems).limit(perPage);
 
                 const jobs = await cursor.toArray();
-                return res.send({total, jobs});
+                return res.send({ jobs, total});
             }
 
             const cursor = jobsCollection.find(query);
