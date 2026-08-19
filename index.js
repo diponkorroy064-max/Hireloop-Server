@@ -27,7 +27,7 @@ const client = new MongoClient(uri, {
 
 const run = async () => {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
+        // Connect the client to the server---
         await client.connect();
         const database = client.db("hireloop-project");
 
@@ -40,9 +40,9 @@ const run = async () => {
         const sessionCollection = database.collection('session');
 
         
-        // varification  related api---
+        // varification related api---
         const varifyToken = async (req, res, next) => {
-            console.log('headers', req.headers);
+            // console.log('headers', req.headers);
             const authHeader = req.headers?.authorization;
             if (!authHeader) {
                 return res.status(401).send({ message: 'unauthorized access' })
@@ -53,6 +53,11 @@ const run = async () => {
             }
             const query = { token: token };
             const session = await sessionCollection.findOne(query);
+            if (!session) {
+                return res.status(401).send({
+                    message: "Invalid or expired token",
+                });
+            }
             // console.log("session", session);
             const userId = session.userId;
             // console.log('userId of the session', userId);
@@ -62,6 +67,11 @@ const run = async () => {
             }
 
             const user = await userCollection.findOne(userQuery);
+            if (!user) {
+                return res.status(401).send({
+                    message: "User not found",
+                });
+            }
             // console.log('user of the session', user);
 
             req.user = user;
@@ -92,13 +102,11 @@ const run = async () => {
             next();
         };
 
-
         // user api---
         app.get('/api/users', async (req, res) => {
             const users = await userCollection.find().toArray();
             res.json(users);
         })
-
 
         // jobs api---
         app.post('/api/jobs', async (req, res) => {
@@ -112,7 +120,8 @@ const run = async () => {
             res.json(result);
         })
 
-
+        
+        // get all jobs in jobs page---
         app.get('/api/jobs', async(req, res) => {
             console.log('server side q', req.query);
             const query = {};
@@ -206,7 +215,7 @@ const run = async () => {
 
 
         // inefficient way to join/aggregate collection---
-        app.get('/api/companies', logger, varifyToken, async (req, res) => {
+        app.get('/api/companies', async (req, res) => {
             const cursor = companyCollection.find();
             const companies = await cursor.toArray();
 
@@ -222,16 +231,16 @@ const run = async () => {
 
 
         // efficient way to join/aggregate collection---
-        app.get('/api/companies2', async (req, res) => {
-            const pipeline = [
-                {
-                    $skip: 5
-                }
-            ];
-            const cursor = companyCollection.aggregate(pipeline);
-            const result = await cursor.toArray();
-            res.json(result);
-        });
+        // app.get('/api/companies2', async (req, res) => {
+        //     const pipeline = [
+        //         {
+        //             $skip: 5
+        //         }
+        //     ];
+        //     const cursor = companyCollection.aggregate(pipeline);
+        //     const result = await cursor.toArray();
+        //     res.json(result);
+        // });
 
 
         app.get("/api/stats", async (req, res) => {
@@ -364,7 +373,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Hello Diponkor..........!')
+    res.send('Hello Diponkor HireLoop Server is Running.......!')
 })
 
 app.listen(port, () => {
