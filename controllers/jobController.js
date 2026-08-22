@@ -80,6 +80,31 @@ const getJobs = async (req, res) => {
     }
 };
 
+const getRecruiterJobs = async (req, res) => {
+    try {
+        const db = getDB();
+        const jobsCollection = db.collection("jobs");
+        const { companyId } = req.params;
+
+        // console.log("Received companyId:", companyId);
+
+        const result = await jobsCollection
+            .find({ companyId: companyId })
+            .toArray();
+
+        // console.log("Found jobs:", result);
+
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error("Error fetching recruiter jobs:", error);
+
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
+
 
 const getJobById = async (req, res) => {
     try {
@@ -96,6 +121,7 @@ const getJobById = async (req, res) => {
 };
 
 
+// get Stats---
 const getStats = async (req, res) => {
     try {
         const db = getDB();
@@ -127,5 +153,9 @@ const getStats = async (req, res) => {
     }
 };
 
-module.exports = { createJob, getJobs, getJobById, getStats};
+module.exports = {
+    createJob, getJobs, getJobById,
+    getStats,
+    getRecruiterJobs
+};
 

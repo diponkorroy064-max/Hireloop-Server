@@ -37,7 +37,7 @@ const getMyCompany = async (req, res) => {
     }
 };
 
-// inefficient way to join/aggregate collection---
+// // inefficient way to join/aggregate collection---
 const getCompanies = async (req, res) => {
     try {
         const db = getDB();
